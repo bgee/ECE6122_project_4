@@ -18,7 +18,7 @@ using namespace std;
 #define Z .850650808352039932
 
 #define updateRate 10
-#define _WIDTH 2.0
+#define _WIDTH 1.0
 // These are the 12 vertices for the icosahedron
 static GLfloat vdata[NVERTEX][3] = {    
    {-X, 0.0, Z}, {X, 0.0, Z}, {-X, 0.0, -Z}, {X, 0.0, -Z},    
@@ -46,6 +46,12 @@ void Normalize(GLfloat* v)
   return;
 }
 
+int floatToInt(float* f)
+{
+  int result = (int)(256.0 * (*f/1.0f));
+  return result;
+}
+
 // depth means how many left
 void DrawTriangle(GLfloat* v1, GLfloat* v2, GLfloat* v3, int depth)
 {
@@ -56,20 +62,26 @@ void DrawTriangle(GLfloat* v1, GLfloat* v2, GLfloat* v3, int depth)
     // simply draw triangl
     //glBegin(GL_TRIANGLES);
     GLfloat rgb[3];
-    rgb[0] = v1[0] + v2[0] + v3[0];
-    rgb[1] = v1[1] + v2[1] + v3[1];
-    rgb[2] = v1[2] + v2[2] + v3[2];
+    rgb[0] = v1[0] + v2[1] + v3[2];
+    rgb[1] = v1[1] + v2[2] + v3[0];
+    rgb[2] = v1[2] + v2[0] + v3[1];
     Normalize(rgb);
+    for (int i = 0; i < 3; i++){
+      if (rgb[i] < 0){
+	rgb[i] = 1 + rgb[i];
+      }
+    }
     //cout << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
     //glColor3f(rgb[0], rgb[1], rgb[2]);
     glBegin(GL_TRIANGLES);
-    glColor3f(0, 0, 1);
+    //glColor3f(0, 0, 1);
+    glColor3f(rgb[0], rgb[1], rgb[2]);
     glVertex3f(v1[0], v1[1], v1[2]);
     glVertex3f(v2[0], v2[1], v2[2]);
     glVertex3f(v3[0], v3[1], v3[2]);
     glEnd();
-    glBegin(GL_LINES);
     glLineWidth(_WIDTH);
+    glBegin(GL_LINES);
     glColor3f(1.0, 1.0, 1.0);
     glVertex3f(v1[0], v1[1], v1[2]);
     glVertex3f(v2[0], v2[1], v2[2]);
@@ -101,11 +113,12 @@ void Test1()
 {
   const int recurDepth = 0; 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // clear matrix
   glLoadIdentity();
+
   gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-  glTranslatef(250, 250, 0);
-  glScalef(100.0, 100.0, 0.0);
+  glTranslatef(0, 0, -150);
+  glScalef(150, 150, 150);
+
   // j is the current face
   for (int j = 0; j < NFACE; j++){
     GLint* face = tindices[j];
@@ -151,11 +164,16 @@ void Test3()
 {
   const int recurDepth = 1; 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // clear matrix
   glLoadIdentity();
+
   gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-  glTranslatef(250, 250, 0);
-  glScalef(100.0, 100.0, 0.0);
+  glTranslatef(0, 0, -150);
+  glScalef(150, 150, 150);
+  static float xr = 0.0;
+  static float yr = 30.0;
+  glRotatef(xr, 1, 0, 0);
+  glRotatef(yr, 0, 1, 0);
+
   // j is the current face
   for (int j = 0; j < NFACE; j++){
     GLint* face = tindices[j];
@@ -169,14 +187,80 @@ void Test3()
 
 void Test4()
 {
+  const int recurDepth = 1; 
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+
+  gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  glTranslatef(0, 0, -150);
+  glScalef(150, 150, 150);
+  static float xr = 0.0;
+  static float yr = 30.0;
+  glRotatef(xr, 1, 0, 0);
+  glRotatef(yr, 0, 1, 0);
+  xr += 1.0;
+  yr += 1.0;
+  // j is the current face
+  for (int j = 0; j < NFACE; j++){
+    GLint* face = tindices[j];
+    GLfloat* t1 = vdata[face[0]];
+    GLfloat* t2 = vdata[face[1]];
+    GLfloat* t3 = vdata[face[2]];
+    DrawTriangle(t1, t2, t3, recurDepth);
+  }
+  glutSwapBuffers();
 }
 
-void Test5(int depth)
+void Test5()
 {
+  const int recurDepth = depth; 
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+
+  gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  glTranslatef(0, 0, -150);
+  glScalef(150, 150, 150);
+  static float xr = 0.0;
+  static float yr = 30.0;
+  glRotatef(xr, 1, 0, 0);
+  glRotatef(yr, 0, 1, 0);
+  //xr += 1.0;
+  //yr += 1.0;
+  // j is the current face
+  for (int j = 0; j < NFACE; j++){
+    GLint* face = tindices[j];
+    GLfloat* t1 = vdata[face[0]];
+    GLfloat* t2 = vdata[face[1]];
+    GLfloat* t3 = vdata[face[2]];
+    DrawTriangle(t1, t2, t3, recurDepth);
+  }
+  glutSwapBuffers();
 }
 
-void Test6(int depth)
+void Test6()
 {
+  const int recurDepth = depth;
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+
+  gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  glTranslatef(0, 0, -150);
+  glScalef(150, 150, 150);
+  static float xr = 0.0;
+  static float yr = 30.0;
+  glRotatef(xr, 1, 0, 0);
+  glRotatef(yr, 0, 1, 0);
+  xr += 1.0;
+  yr += 1.0;
+  // j is the current face
+  for (int j = 0; j < NFACE; j++){
+    GLint* face = tindices[j];
+    GLfloat* t1 = vdata[face[0]];
+    GLfloat* t2 = vdata[face[1]];
+    GLfloat* t3 = vdata[face[2]];
+    DrawTriangle(t1, t2, t3, recurDepth);
+  }
+  glutSwapBuffers();
 }
 
 void reshape(int w, int h)
@@ -206,8 +290,10 @@ int main(int argc, char** argv)
     }
   // Set the global test number
   testNumber = atol(argv[1]);
-  if (5 == testNumber){
-    depth = atol(argv[2]);
+  if (5 == testNumber || 6 == testNumber){
+    if (argc == 3){
+      depth = atol(argv[2]);
+    }
   }
 
   // Initialize glut  and create your window here
@@ -231,6 +317,15 @@ int main(int argc, char** argv)
   }
   else if (3 == testNumber){
     glutDisplayFunc(Test3);
+  }
+  else if (4 == testNumber){
+    glutDisplayFunc(Test4);
+  }
+  else if (5 == testNumber){
+    glutDisplayFunc(Test5);
+  }
+  else if (6 == testNumber){
+    glutDisplayFunc(Test6);
   }
   glutReshapeFunc(reshape);
   glutTimerFunc(1000.0 / updateRate, timer, 0);
