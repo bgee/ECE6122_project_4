@@ -8,6 +8,8 @@
 #include <GL/glext.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <map>
+#include <vector>
 
 using namespace std;
 
@@ -37,6 +39,11 @@ static GLint tindices[NFACE][3] = {
 int testNumber; // Global variable indicating which test number is desired
 int depth;
 
+// hashtable for non-repeating colors
+map<vector<float>, GLfloat> R;
+map<vector<float>, GLfloat> G;
+map<vector<float>, GLfloat> B;
+
 void Normalize(GLfloat* v)
 {
   GLfloat length = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
@@ -52,6 +59,32 @@ int floatToInt(float* f)
   return result;
 }
 
+GLfloat GenerateColor(){
+  return ((GLfloat) rand() / (RAND_MAX));
+}
+
+float RetriveColor(vector<float> *key, map<vector<float>, GLfloat> *map)
+{
+  //cout << "enter Retrive" << *key << endl;
+  std::map<vector<float>,GLfloat>::iterator it;
+  it = map->find(*key);
+  // found
+  if (it != map->end()){
+    //cout << "found" << endl;
+    return it->second;
+  }
+  else {
+    GLfloat c = GenerateColor();
+    while (c == 0) c = GenerateColor();
+    if (c < 0){
+      //cout << "++++++++++++" << c << endl;
+    }
+    map->insert( pair<vector<float>, GLfloat>(*key, c));
+    //*map[*key] = c;
+    return c;
+  }
+}
+
 // depth means how many left
 void DrawTriangle(GLfloat* v1, GLfloat* v2, GLfloat* v3, int depth)
 {
@@ -62,15 +95,33 @@ void DrawTriangle(GLfloat* v1, GLfloat* v2, GLfloat* v3, int depth)
     // simply draw triangl
     //glBegin(GL_TRIANGLES);
     GLfloat rgb[3];
-    rgb[0] = v1[0] + v2[1] + v3[2];
-    rgb[1] = v1[1] + v2[2] + v3[0];
-    rgb[2] = v1[2] + v2[0] + v3[1];
-    Normalize(rgb);
-    for (int i = 0; i < 3; i++){
-      if (rgb[i] < 0){
-	rgb[i] = 1 + rgb[i];
-      }
+    rgb[0] = v1[0] + v2[0] + v3[0];
+    rgb[1] = v1[1] + v2[1] + v3[1];
+    rgb[2] = v1[2] + v2[2] + v3[2];
+    vector<float> coor(9);
+    coor[0] = v1[0]; coor[1] = v1[1]; coor[2] = v1[2];
+    coor[3] = v2[0]; coor[4] = v2[1]; coor[5] = v2[2];
+    coor[6] = v3[0]; coor[7] = v3[1]; coor[8] = v3[2];
+    /*cout << "key = ";
+    for (int i = 0; i < 9; i++){
+      cout << coor[i] << " ";
     }
+    cout << "\n";*/
+    rgb[0] = RetriveColor(&coor, &R);
+    rgb[1] = RetriveColor(&coor, &G);
+    rgb[2] = RetriveColor(&coor, &B);
+    //Normalize(rgb);
+    GLfloat final = rgb[0] + rgb[0] + rgb[0];
+    GLfloat anoFinal = rgb[1] + rgb[1] + rgb[1];
+    GLfloat yetFinal = rgb[2] + rgb[2] + rgb[2];
+    // see if r in R
+    /*RetriveColor(&final, &R);
+    rgb[0] = final;
+    RetriveColor(&anoFinal, &G);
+    rgb[1] = anoFinal;
+    RetriveColor(&yetFinal, &B);
+    rgb[2] = yetFinal;*/
+    
     //cout << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
     //glColor3f(rgb[0], rgb[1], rgb[2]);
     glBegin(GL_TRIANGLES);
@@ -157,7 +208,16 @@ void Test2()
   }
   glFlush();
   glutSwapBuffers();
-  // cin.ignore();
+  //cin.ignore();
+  /*map<vector<float>, GLfloat>::iterator it;
+  cout << "anothermap contains:\n";
+  for (it=R.begin(); it!=R.end(); ++it){
+    for (int j = 0; j < 9; j++){
+    }
+    //cout << it->first << " => " << it->second << '\n';
+    cout << "has value" << endl;
+    }*/
+  //exit(0);
 }
 
 void Test3()

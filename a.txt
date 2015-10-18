@@ -1,0 +1,2 @@
+g++ -c -g icosahedron.cc
+Makefile:8: recipe for target 'icosahedron.o' failed
