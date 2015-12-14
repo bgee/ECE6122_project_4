@@ -208,16 +208,6 @@ void Test2()
   }
   glFlush();
   glutSwapBuffers();
-  //cin.ignore();
-  /*map<vector<float>, GLfloat>::iterator it;
-  cout << "anothermap contains:\n";
-  for (it=R.begin(); it!=R.end(); ++it){
-    for (int j = 0; j < 9; j++){
-    }
-    //cout << it->first << " => " << it->second << '\n';
-    cout << "has value" << endl;
-    }*/
-  //exit(0);
 }
 
 void Test3()
